@@ -1,13 +1,32 @@
 stages:
+  - setup
+  - build
   - deploy
+
+setup:
+  stage: setup
+  script:
+    - npm ci
+  only:
+    - master
+
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - build
+  only:
+    - master
+
 
 deploy:
   stage: deploy
-  environment:
-    name: production
+  script:
+    - npm i -g netlify-cli
+    - netlify deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod
+  dependencies:
+    - build
   only:
     - master
-  script:
-    - npm i
-    - npm run build
-    - npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod
